@@ -51,14 +51,6 @@ GroqBot X is an AI-powered document interaction system that allows you to **chat
 
 ---
 
-## 🖼️ Screenshots
-
-| Upload & Process | Ask Questions |
-|------------------|----------------|
-| ![upload](https://i.imgur.com/NuAq7pq.png) | ![chat](https://i.imgur.com/nFKAn6C.png) |
-
----
-
 ## 🧪 Setup Locally
 
 1. Clone this repo  
