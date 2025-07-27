@@ -1,7 +1,5 @@
 # GroqBot X – Chat with Your Documents, Smarter & Faster!
 
-[![Streamlit App](https://groqbotx.streamlit.app/)
-
 GroqBot X is an AI-powered document interaction system that allows you to **chat with your PDF, DOCX, or TXT documents** in real-time. It uses advanced NLP techniques, semantic search, and retrieval-augmented generation (RAG) to help you get instant, contextual answers from your documents with high accuracy.
 
 ---
@@ -49,6 +47,10 @@ GroqBot X is an AI-powered document interaction system that allows you to **chat
 6. Groq’s LLaMA3 generates a context-aware answer using LangChain.
 7. Output is shown along with the document chunks used.
 
+---
+## 🔐 Environment Variables
+
+Create a `.env` file in the root directory with the following content:
 ---
 
 ## 🧪 Setup Locally
