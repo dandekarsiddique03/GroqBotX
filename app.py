@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import time
-from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -14,9 +13,10 @@ import chardet
 from docx import Document
 from reportlab.pdfgen import canvas
 
-# Load environment variables
-load_dotenv()
-groq_api_key = os.getenv("GROQ_API_KEY")
+# ------------------------------------------------------
+#  STREAMLIT CLOUD SECRET LOADING (IMPORTANT FIX)
+# ------------------------------------------------------
+groq_api_key = st.secrets["GROQ_API_KEY"]
 
 st.title('GroqBot X – "Chat with Your Documents, Smarter & Faster!"')
 
@@ -31,13 +31,13 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
-# ------------- FILE ENCODING -------------
+# ---------- ENCODING ----------
 def detect_encoding(file_path):
     with open(file_path, 'rb') as f:
         raw = f.read()
     return chardet.detect(raw)['encoding']
 
-# ------------- TXT ➝ PDF -------------
+# ---------- TXT → PDF ----------
 def convert_txt_to_pdf(txt_path, pdf_path):
     enc = detect_encoding(txt_path)
     with open(txt_path, "r", encoding=enc) as f:
@@ -54,7 +54,7 @@ def convert_txt_to_pdf(txt_path, pdf_path):
         y -= 20
     c.save()
 
-# ------------- DOCX ➝ PDF -------------
+# ---------- DOCX → PDF ----------
 def convert_docx_to_pdf(docx_path, pdf_path):
     doc = Document(docx_path)
     c = canvas.Canvas(pdf_path)
@@ -68,7 +68,7 @@ def convert_docx_to_pdf(docx_path, pdf_path):
         y -= 20
     c.save()
 
-# ------------- PROCESS FILES -------------
+# ---------- PROCESS FILES ----------
 def process_files(uploaded_files):
     if uploaded_files:
         for uploaded_file in uploaded_files:
@@ -76,19 +76,16 @@ def process_files(uploaded_files):
             with open(file_path, "wb") as f:
                 f.write(uploaded_file.read())
 
-            # Convert to PDF
             if file_path.endswith(".txt"):
-                pdf = file_path.replace(".txt", ".pdf")
-                convert_txt_to_pdf(file_path, pdf)
+                convert_txt_to_pdf(file_path, file_path.replace(".txt", ".pdf"))
 
             elif file_path.endswith(".docx"):
-                pdf = file_path.replace(".docx", ".pdf")
-                convert_docx_to_pdf(file_path, pdf)
+                convert_docx_to_pdf(file_path, file_path.replace(".docx", ".pdf"))
 
     vector_embedding()
     st.success(f"✅ {len(uploaded_files)} files processed successfully!")
 
-# ------------- VECTOR EMBEDDING -------------
+# ---------- VECTOR EMBEDDING ----------
 def vector_embedding():
     pdf_files = [
         os.path.join(DOC_DIR, f)
@@ -116,14 +113,14 @@ def vector_embedding():
     st.session_state.vectors = FAISS.from_documents(final_docs, embeddings)
     st.success("✅ Vector Store DB is Ready!")
 
-# ------------- PROCESS BUTTON -------------
+# ---------- PROCESS BUTTON ----------
 if st.button("Process Documents"):
     if uploaded_files:
         process_files(uploaded_files)
     else:
         st.warning("⚠️ Upload at least one document.")
 
-# ------------- QUERY BOX -------------
+# ---------- USER QUERY ----------
 prompt1 = st.text_input("Ask a question from the documents")
 
 if prompt1:
@@ -135,8 +132,9 @@ if prompt1:
         )
 
         prompt = ChatPromptTemplate.from_template("""
-        Answer strictly from the provided context.
-        If the answer is not in the context, reply: "I cannot find this in the documents."
+        Answer based ONLY on the provided context.
+        If the answer is not found, say:
+        "I cannot find this in the documents."
 
         <context>
         {context}
@@ -163,7 +161,7 @@ if prompt1:
     else:
         st.warning("⚠️ Process the documents first!")
 
-# ------------- CLEAR ALL BUTTON -------------
+# ---------- CLEAR ALL ----------
 if st.sidebar.button("Clear All Files"):
     for f in os.listdir(DOC_DIR):
         os.remove(os.path.join(DOC_DIR, f))
